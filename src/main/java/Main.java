@@ -2,11 +2,15 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 public class Main {
+    static Map<String, String> cachedData = new HashMap<>();
+
     public static void main(String[] args) throws IOException {
         int port = 6379;
 
@@ -23,6 +27,7 @@ public class Main {
     public static void handleClient(Socket client) {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
              PrintWriter out = new PrintWriter(client.getOutputStream(), true)) {
+
             String message;
             List<String> inputData = new ArrayList<>();
             int expectedArguments = 0;
@@ -44,7 +49,7 @@ public class Main {
                     inputData.add(readInput(commandLength, message));
 
                     if (inputData.size() == expectedArguments) {
-                        printOutput(inputData, out);
+                        processCommand(inputData, out);
                         inputData.clear();
                     }
                 }
@@ -58,7 +63,7 @@ public class Main {
         return message.substring(0, commandLength);
     }
 
-    private static void printOutput(List<String> inputData, PrintWriter out) {
+    private static void processCommand(List<String> inputData, PrintWriter out) {
         String command = inputData.removeFirst();
 
         switch (command) {
@@ -70,10 +75,25 @@ public class Main {
                 for (String argument : inputData) {
                     argumentsToPrint.append(argument);
                 }
-                out.print("$" + argumentsToPrint.length() + "\r\n" + argumentsToPrint + "\r\n");
+                printOutcome(argumentsToPrint.toString(), out);
+            }
+            case "SET" -> {
+                cachedData.put(inputData.getFirst(), inputData.getLast());
+                out.print("+OK\r\n");
+            }
+            case "GET" -> {
+                printOutcome(cachedData.get(inputData.getFirst()), out);
             }
         }
 
         out.flush();
+    }
+
+    private static void printOutcome(String outcome, PrintWriter out) {
+        if (nonNull(outcome)) {
+            out.print("$" + outcome.length() + "\r\n" + outcome + "\r\n");
+        } else {
+            out.print("$-1\r\n");
+        }
     }
 }
