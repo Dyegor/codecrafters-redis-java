@@ -1,15 +1,21 @@
+import model.CachedString;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.time.LocalDateTime.now;
+import static java.time.temporal.ChronoUnit.MILLIS;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 public class Main {
-    static Map<String, String> cachedData = new HashMap<>();
+    static Map<String, CachedString> cachedData = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
         int port = 6379;
@@ -41,17 +47,15 @@ public class Main {
                 }
 
                 if (message.startsWith("+") | message.startsWith("$")) {
-                    commandLength = Integer.parseInt(message.substring(1, 2));
+                    commandLength = Integer.parseInt(message.substring(1, message.length()));
                     continue;
                 }
 
-                if (Character.isLetter(message.charAt(0))) {
-                    inputData.add(readInput(commandLength, message));
+                inputData.add(readInput(commandLength, message));
 
-                    if (inputData.size() == expectedArguments) {
-                        processCommand(inputData, out);
-                        inputData.clear();
-                    }
+                if (inputData.size() == expectedArguments) {
+                    processCommand(inputData, out);
+                    inputData.clear();
                 }
             }
         } catch (IOException e) {
@@ -78,11 +82,29 @@ public class Main {
                 printOutcome(argumentsToPrint.toString(), out);
             }
             case "SET" -> {
-                cachedData.put(inputData.getFirst(), inputData.getLast());
+                String keyToCache = inputData.removeFirst();
+                String stringToCache = inputData.removeFirst();
+                LocalDateTime expiresAt = null;
+
+                if (!inputData.isEmpty()) {
+                    expiresAt = now().plus(Integer.parseInt(inputData.getLast()), MILLIS);
+                }
+
+                CachedString cachedString = new CachedString(stringToCache, expiresAt);
+
+                cachedData.put(keyToCache, cachedString);
                 out.print("+OK\r\n");
             }
             case "GET" -> {
-                printOutcome(cachedData.get(inputData.getFirst()), out);
+                CachedString cachedString = cachedData.get(inputData.getFirst());
+
+                if (isNull(cachedString) || (nonNull(cachedString.getExpiresAt())
+                        && now().isAfter(cachedString.getExpiresAt()))) {
+
+                    out.print("$-1\r\n");
+                } else {
+                    printOutcome(cachedString.getCachedValue(), out);
+                }
             }
         }
 
