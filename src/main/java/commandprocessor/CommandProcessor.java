@@ -62,7 +62,7 @@ public class CommandProcessor {
                 List<String> valuesList = storageHandler.getListsMap()
                         .computeIfAbsent(inputData.removeFirst(),key -> new ArrayList<>());
 
-                valuesList.add(inputData.removeFirst());
+                valuesList.addAll(inputData);
 
                 respWriter.printIntegerOutcome(valuesList.size(), out);
             }
