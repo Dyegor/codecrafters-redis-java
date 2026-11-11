@@ -7,9 +7,7 @@ import storage.StorageHandler;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.time.LocalDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
@@ -65,6 +63,29 @@ public class CommandProcessor {
                 valuesList.addAll(inputData);
 
                 respWriter.printIntegerOutcome(valuesList.size(), out);
+            }
+            case "LRANGE" -> {
+                List<String> valuesList = storageHandler.getListsMap().get(inputData.removeFirst());
+
+                if (isNull(valuesList)) {
+                    respWriter.printArray(new ArrayList<>(), out);
+                    return;
+                }
+
+                int firstIndex =  Integer.parseInt(inputData.getFirst());
+                int lastIndex =  Integer.parseInt(inputData.getLast());
+
+                if (lastIndex >= valuesList.size()) {
+                    lastIndex = valuesList.size() - 1;
+                }
+
+                List<String> results = new ArrayList<>();
+
+                for (int i = firstIndex; i <= lastIndex; i++) {
+                    results.add(valuesList.get(i));
+                }
+
+                respWriter.printArray(results, out);
             }
         }
     }
