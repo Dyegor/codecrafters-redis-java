@@ -24,7 +24,7 @@ public class ClientHandler {
 
             while ((message = in.readLine()) != null) {
                 if (message.startsWith("*")) {
-                    expectedArguments = Integer.parseInt(message.substring(1, 2));
+                    expectedArguments = Integer.parseInt(message.substring(1));
                     continue;
                 }
 

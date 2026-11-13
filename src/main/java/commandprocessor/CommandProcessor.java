@@ -7,6 +7,7 @@ import storage.StorageHandler;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.time.LocalDateTime.now;
@@ -96,9 +97,23 @@ public class CommandProcessor {
                 List<String> valuesList = storageHandler.getListsMap()
                         .computeIfAbsent(inputData.removeFirst(),key -> new ArrayList<>());
 
-                String removedElement = valuesList.removeFirst();
+                if (inputData.isEmpty()) {
+                    String removedElement = valuesList.removeFirst();
 
-                respWriter.printOutcome(removedElement, out);
+                    respWriter.printOutcome(removedElement, out);
+                } else {
+                    ArrayList<String> removedElements = new ArrayList<>();
+                    int index = 0;
+                    int stopIndex = Integer.parseInt(inputData.getFirst());
+
+                    while (index < stopIndex) {
+                        removedElements.add(valuesList.removeFirst());
+
+                        index++;
+                    }
+
+                    respWriter.printArray(removedElements, out);
+                }
             }
         }
     }
