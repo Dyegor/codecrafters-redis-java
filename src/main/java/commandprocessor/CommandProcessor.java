@@ -7,7 +7,6 @@ import storage.StorageHandler;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static java.time.LocalDateTime.now;
@@ -86,6 +85,12 @@ public class CommandProcessor {
                 List<String> results = getResults(inputData, valuesList);
 
                 respWriter.printArray(results, out);
+            }
+            case "LLEN" -> {
+                List<String> valuesList = storageHandler.getListsMap()
+                        .computeIfAbsent(inputData.removeFirst(),key -> new ArrayList<>());
+
+                respWriter.printIntegerOutcome(valuesList.size(), out);
             }
         }
     }
