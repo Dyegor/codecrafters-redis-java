@@ -7,6 +7,7 @@ import storage.StorageHandler;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static java.time.LocalDateTime.now;
@@ -61,6 +62,16 @@ public class CommandProcessor {
                         .computeIfAbsent(inputData.removeFirst(),key -> new ArrayList<>());
 
                 valuesList.addAll(inputData);
+
+                respWriter.printIntegerOutcome(valuesList.size(), out);
+            }
+            case "LPUSH" -> {
+                List<String> valuesList = storageHandler.getListsMap()
+                        .computeIfAbsent(inputData.removeFirst(),key -> new ArrayList<>());
+
+                for (String value : inputData) {
+                    valuesList.addFirst(value);
+                }
 
                 respWriter.printIntegerOutcome(valuesList.size(), out);
             }
