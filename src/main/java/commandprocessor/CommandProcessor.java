@@ -72,21 +72,43 @@ public class CommandProcessor {
                     return;
                 }
 
-                int firstIndex =  Integer.parseInt(inputData.getFirst());
-                int lastIndex =  Integer.parseInt(inputData.getLast());
-
-                if (lastIndex >= valuesList.size()) {
-                    lastIndex = valuesList.size() - 1;
-                }
-
-                List<String> results = new ArrayList<>();
-
-                for (int i = firstIndex; i <= lastIndex; i++) {
-                    results.add(valuesList.get(i));
-                }
+                List<String> results = getResults(inputData, valuesList);
 
                 respWriter.printArray(results, out);
             }
         }
+    }
+
+    private static List<String> getResults(List<String> inputData, List<String> valuesList) {
+        int firstIndex =  Integer.parseInt(inputData.getFirst());
+        int lastIndex =  Integer.parseInt(inputData.getLast());
+
+        if (lastIndex >= valuesList.size()) {
+            lastIndex = valuesList.size() - 1;
+        }
+
+        if (Math.abs(firstIndex) > valuesList.size()) {
+            firstIndex = 0;
+        }
+
+        if (Math.abs(lastIndex) > valuesList.size()) {
+            lastIndex = 0;
+        }
+
+        if (firstIndex < 0) {
+            firstIndex = valuesList.size() - Math.abs(firstIndex);
+        }
+
+        if (lastIndex < 0) {
+            lastIndex = valuesList.size() - Math.abs(lastIndex);
+        }
+
+        List<String> results = new ArrayList<>();
+
+        for (int i = firstIndex; i <= lastIndex; i++) {
+            results.add(valuesList.get(i));
+        }
+
+        return results;
     }
 }
