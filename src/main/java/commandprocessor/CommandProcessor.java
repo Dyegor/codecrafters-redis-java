@@ -47,7 +47,7 @@ public class CommandProcessor {
                 respWriter.printOutcome("+OK", out);
             }
             case "GET" -> {
-                CachedString cachedString =  storageHandler.getStringsMap().get(inputData.getFirst());
+                CachedString cachedString = storageHandler.getStringsMap().get(inputData.getFirst());
 
                 if (isNull(cachedString) || (nonNull(cachedString.expiresAt())
                         && now().isAfter(cachedString.expiresAt()))) {
@@ -91,6 +91,14 @@ public class CommandProcessor {
                         .computeIfAbsent(inputData.removeFirst(),key -> new ArrayList<>());
 
                 respWriter.printIntegerOutcome(valuesList.size(), out);
+            }
+            case "LPOP" -> {
+                List<String> valuesList = storageHandler.getListsMap()
+                        .computeIfAbsent(inputData.removeFirst(),key -> new ArrayList<>());
+
+                String removedElement = valuesList.removeFirst();
+
+                respWriter.printOutcome(removedElement, out);
             }
         }
     }
